@@ -1,7 +1,1 @@
-[
-  { "id": 1, "name": "Laptop Pro", "category": "Electronics", "price": 2499 },
-  { "id": 2, "name": "Noise Cancelling Headphones", "category": "Electronics", "price": 399 },
-  { "id": 3, "name": "Ultra‑Wide Monitor", "category": "Electronics", "price": 999 },
-  { "id": 4, "name": "Ergonomic Chair", "category": "Furniture", "price": 799 },
-  { "id": 5, "name": "Standing Desk", "category": "Furniture", "price": 1199 }
-]
+[{"id":"6c62737f-eeb4-43b2-a8e0-92dc37063b7b","name":"Laptop Pro","category":"Electronics","price":2499},{"id":"8f9a80ce-80d5-4374-91f0-15b1cf93580a","name":"Noise Cancelling Headphones","category":"Electronics","price":399},{"id":"35691cc9-c0f1-469f-bf17-9c1b2cc94b87","name":"Ultra‑Wide Monitor","category":"Electronics","price":999},{"id":"68f66e01-538f-4b79-b7bb-f7cd641ee300","name":"Ergonomic Chair","category":"Furniture","price":799},{"id":"c8b4a893-5947-4c47-bb10-ea9d43d9bd9f","name":"Standing Desk","category":"Furniture","price":1199},{"name":"Mechanical Keyboard","category":"Electronics","price":1,"id":"80dfc6c0-d5e0-4cc6-800d-dbc0662b8973"}]

@@ -1,36 +1,31 @@
 const express = require('express');
-const fs = require('fs/promises');
-const path = require('path');
 const Fuse = require('fuse.js')
+const {v4: uuidv4} = require('uuid');
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
-async function readData() {
-  const raw = await fs.readFile(DATA_PATH);
-  return JSON.parse(raw);
-}
+const {getItems, saveItems} = require('../repositories/itemRepository');
+
 
 // GET /api/items
 router.get('/', async (req, res, next) => {
   try {
-    const data = await readData();
+    let items = await getItems();
     const { limit, q } = req.query;
-    let results = data;
 
     if (q) {
-      const fuse = new Fuse(data, {
+      const fuse = new Fuse(items, {
         keys: ['name'],
         threshold: 0.3,
         ignoreLocation: true
       });
-      results = fuse.search(q);
+      items = fuse.search(q);
     }
 
     if (limit) {
-      results = results.slice(0, parseInt(limit));
+      items = items.slice(0, parseInt(limit));
     }
 
-    res.json(results);
+    res.json(items);
   } catch (err) {
     next(err);
   }
@@ -39,8 +34,8 @@ router.get('/', async (req, res, next) => {
 // GET /api/items/:id
 router.get('/:id', async (req, res, next) => {
   try {
-    const data = await readData();
-    const item = data.find(i => i.id === parseInt(req.params.id));
+    const items = await getItems();
+    const item = items.find(i => i.id === req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'Item not found' });
     }
@@ -51,18 +46,30 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // POST /api/items
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
-    // TODO: Validate payload (intentional omission)
     const item = req.body;
-    const data = readData();
-    item.id = Date.now();
-    data.push(item);
-    fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+
+    if(!isValidRequest(item))
+      return res.status(400).json({ error: 'Invalid request body' });
+
+    const items = await getItems();
+
+    item.id = uuidv4();
+    items.push(item);
+
+    await saveItems(items);
+
     res.status(201).json(item);
   } catch (err) {
     next(err);
   }
 });
+
+function isValidRequest(item) {
+  return item.name
+      && item.category
+      && typeof item.price === 'number';
+}
 
 module.exports = router;

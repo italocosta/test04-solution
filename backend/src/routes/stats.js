@@ -1,10 +1,15 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
-let cachedData = null;
+const {getItems} = require('../repositories/itemRepository');
+const {events} = require("../repositories/dataSource");
+
+let cachedStats = null;
+
+events.on('dataUpdated', async () => {
+    const items = await getItems();
+    cachedStats = performStats(items);
+})
 
 function performStats(items) {
     return {
@@ -14,19 +19,16 @@ function performStats(items) {
 }
 
 // GET /api/stats
-router.get('/', (req, res, next) => {
-    if (cachedData) return res.send(cachedData);
+router.get('/', async (req, res, next) => {
+    try {
+        if (cachedStats) return res.send(cachedStats);
 
-    fs.readFile(DATA_PATH, (err, raw) => {
-        if (err) return next(err);
-        try {
-            const items = JSON.parse(raw);
-            cachedData = performStats(items);
-            res.json(cachedData);
-        } catch (err) {
-            next(new Error('Could not perform stats'));
-        }
-    });
+        const items = await getItems();
+        cachedStats = performStats(items);
+        res.json(cachedStats);
+    } catch (err) {
+        next(err);
+    }
 });
 
 module.exports = router;
