@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const morgan = require('morgan');
 const itemsRouter = require('./routes/items');
 const statsRouter = require('./routes/stats');
@@ -27,3 +26,5 @@ app.use('*', notFound);
 getCookie();
 
 app.listen(port, () => console.log('Backend running on http://localhost:' + port));
+
+module.exports = app;

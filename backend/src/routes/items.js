@@ -18,7 +18,7 @@ router.get('/', async (req, res, next) => {
         threshold: 0.3,
         ignoreLocation: true
       });
-      items = fuse.search(q);
+      items = fuse.search(q).map(r => r.item)
     }
 
     if (limit) {
