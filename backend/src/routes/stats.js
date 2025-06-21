@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {getItems} = require('../repositories/itemRepository');
 const {events} = require("../repositories/dataSource");
+const { mean } = require('../utils/stats')
 
 let cachedStats = null;
 
@@ -14,7 +15,7 @@ events.on('dataUpdated', async () => {
 function performStats(items) {
     return {
         total: items.length,
-        averagePrice: items.reduce((acc, cur) => acc + cur.price, 0) / items.length
+        averagePrice: mean(items.map(i => i.price))
     }
 }
 
