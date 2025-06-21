@@ -1,25 +1,29 @@
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
+const Fuse = require('fuse.js')
 const router = express.Router();
 const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
-// Utility to read data (intentionally sync to highlight blocking issue)
-function readData() {
-  const raw = fs.readFileSync(DATA_PATH);
+async function readData() {
+  const raw = await fs.readFile(DATA_PATH);
   return JSON.parse(raw);
 }
 
 // GET /api/items
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    const data = readData();
+    const data = await readData();
     const { limit, q } = req.query;
     let results = data;
 
     if (q) {
-      // Simple substring search (sub‑optimal)
-      results = results.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
+      const fuse = new Fuse(data, {
+        keys: ['name'],
+        threshold: 0.3,
+        ignoreLocation: true
+      });
+      results = fuse.search(q);
     }
 
     if (limit) {
@@ -33,14 +37,12 @@ router.get('/', (req, res, next) => {
 });
 
 // GET /api/items/:id
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   try {
-    const data = readData();
+    const data = await readData();
     const item = data.find(i => i.id === parseInt(req.params.id));
     if (!item) {
-      const err = new Error('Item not found');
-      err.status = 404;
-      throw err;
+      return res.status(404).json({ error: 'Item not found' });
     }
     res.json(item);
   } catch (err) {

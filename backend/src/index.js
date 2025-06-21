@@ -13,7 +13,10 @@ app.use(cors({ origin: 'http://localhost:3000' }));
 // Basic middleware
 app.use(express.json());
 app.use(morgan('dev'));
-
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+});
 // Routes
 app.use('/api/items', itemsRouter);
 app.use('/api/stats', statsRouter);
